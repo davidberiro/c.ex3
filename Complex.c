@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "Complex.h"
 #include <assert.h>
 
@@ -19,5 +20,5 @@ typedef struct Complex
 ComplexP fromCharFunc(char * s)
 {
     assert(s != NULL);
-    Complex
+    ComplexP complexp = malloc(sizeof(Complex));
 }
