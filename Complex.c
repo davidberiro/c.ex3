@@ -93,6 +93,7 @@ ComplexP fromCharFunc(char * s)
 */
 int toChar(char * str, int n, ConstComplexP num)
 {
+    assert(num != NULL);
 
 }
 

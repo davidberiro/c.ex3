@@ -1,6 +1,5 @@
 
 
-
 #ifndef GENGROUP_H
 #define GENGROUP_H
 
@@ -8,8 +7,8 @@
 #include <stdbool.h>
 #include  "Epsilon.h"
 
-//********      types and functions types
-**
+/********      types and functions types
+*
 * A pointer to group number/member. 
 */
 typedef void * GroupMemberP;
@@ -31,7 +30,8 @@ typedef const void * ConstGroupMemberP;
  * @param freeMember pointer to A function that get GroupMemberP and frees it from memory.
  * @return the result of add(f(n),g(n)).  In case of an error return NULL.
  */
-/*ADD addFunctions SIGNATURE HERE*/
+GroupMemberP addFunctions(GroupMemberP (*add)(GroupMemberP, GroupMemberP), GroupMemberP (*f)(GroupMemberP),\
+                                GroupMemberP (*g)(GroupMemberP), GroupMemberP n, void (*freeMember)(GroupMemberP));
 
 
 
@@ -44,7 +44,8 @@ typedef const void * ConstGroupMemberP;
  * @param freeMember pointer to A function that get GroupMemberP and frees it from memory.
  * @return the result of f(g(n)).  In case of an error return NULL.
  */
-/*ADD composeFunctions SIGNATURE HERE*/
+GroupMemberP composeFunctions(GroupMemberP (*f)(GroupMemberP), GroupMemberP (*g)(GroupMemberP),\
+                                    GroupMemberP n, void (*freeMember)(GroupMemberP));
 
 
 /**
