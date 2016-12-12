@@ -3,12 +3,51 @@
 #include "Complex.h"
 #include <assert.h>
 #include <string.h>
+#include "Epsilon.h"
 
 typedef struct Complex
 {
     double re;
     double im;
 } Complex;
+
+/**
+* @brief compares two real numbers
+*
+* @param n1 first number
+* @param n2 second number
+*
+* @return 0 iff |n1-n2|<EPSILON, otherwise 1 if n1>n2 or -1 if n1<n2
+*/
+int compareNum(double n1, double n2)
+{
+    int result = n1 - n2;
+    if (result > EPSILON)
+    {
+        return 1;
+    }
+    if (result < -EPSILON)
+    {
+        return -1;
+    }
+    return 0;
+}
+
+//add comments
+int compareComplex(ComplexP num1, ComplexP num2)
+{
+    int result = compareNum(num1->re, num2->re);
+    if (result != 0)
+    {
+        return result;
+    }
+    result = compareNum(num1->im, num2->im);
+    if (result != 0)
+    {
+        return result;
+    }
+    return 0;
+}
 
 /**
  * @brief create a new complex number
@@ -122,6 +161,13 @@ ComplexP mult(ConstComplexP num1,ConstComplexP num2)
     complexp->re = (num1->re * num2->re) - (num2->im * num1->im);
     complexp->im = (num1->re * num2->im) + (num2->re * num1->im);
     return complexp;
+}
+
+int (*getCompareFunc())(ComplexP, ComplexP)
+{
+    int (*functionPtr)(Complex, Complex);
+    functionPtr = &compareComplex;
+    return functionPtr;
 }
 
 

@@ -86,7 +86,7 @@ ComplexP mult(ConstComplexP num1,ConstComplexP num2);
  *                <0 if num1<num2
  */
  
-  /*ADD getCompareFunc SIGNATURE HERE*/
+ int (*getCompareFunc())(ComplexP, ComplexP);
 
 
 #endif // COMPLEX_H
