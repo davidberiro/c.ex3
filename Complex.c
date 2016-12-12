@@ -19,7 +19,7 @@ typedef struct Complex
 *
 * @return 0 iff |n1-n2|<EPSILON, otherwise 1 if n1>n2 or -1 if n1<n2
 */
-int compareNum(double n1, double n2)
+static int compareNum(double n1, double n2)
 {
     int result = n1 - n2;
     if (result > EPSILON)
@@ -34,14 +34,18 @@ int compareNum(double n1, double n2)
 }
 
 //add comments
-int compareComplex(ComplexP num1, ComplexP num2)
+static int compareComplex(ComplexP num1, ComplexP num2)
 {
     int result = compareNum(num1->re, num2->re);
     if (result != 0)
-    {
+    {   
+        free(num1);
+        free(num2);
         return result;
     }
     result = compareNum(num1->im, num2->im);
+    free(num1);
+    free(num2);
     if (result != 0)
     {
         return result;
@@ -123,6 +127,9 @@ ComplexP add(ConstComplexP num1,ConstComplexP num2)
     ComplexP complexp = (ComplexP) malloc(sizeof(Complex));
     complexp->re = num1->re + num2->re;
     complexp->im = num1->im + num2->im;
+    free(num1);
+    free(num2);
+
     return complexp;
 }
 
@@ -142,6 +149,7 @@ ComplexP multScalar(double scalar,ConstComplexP num)
     ComplexP complexp = (ComplexP) malloc(sizeof(Complex));
     complexp->re = num->re * scalar;
     complexp->im = num->im * scalar;
+    free(num);
     return complexp;
 }
 
@@ -161,6 +169,8 @@ ComplexP mult(ConstComplexP num1,ConstComplexP num2)
     ComplexP complexp = (ComplexP) malloc(sizeof(Complex));
     complexp->re = (num1->re * num2->re) - (num2->im * num1->im);
     complexp->im = (num1->re * num2->im) + (num2->re * num1->im);
+    free(num1);
+    free(num2);
     return complexp;
 }
 
