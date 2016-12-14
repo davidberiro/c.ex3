@@ -39,13 +39,9 @@ static int compareComplex(ComplexP num1, ComplexP num2)
     int result = compareNum(num1->re, num2->re);
     if (result != 0)
     {   
-        free(num1);
-        free(num2);
         return result;
     }
     result = compareNum(num1->im, num2->im);
-    free(num1);
-    free(num2);
     if (result != 0)
     {
         return result;
@@ -108,6 +104,7 @@ int toChar(char * str, int n, ConstComplexP num)
  */
 void freeComplex(ComplexP num)
 {
+    assert(num != NULL);
     free(num);
 }
 
@@ -127,9 +124,6 @@ ComplexP add(ConstComplexP num1,ConstComplexP num2)
     ComplexP complexp = (ComplexP) malloc(sizeof(Complex));
     complexp->re = num1->re + num2->re;
     complexp->im = num1->im + num2->im;
-    free(num1);
-    free(num2);
-
     return complexp;
 }
 
@@ -149,7 +143,6 @@ ComplexP multScalar(double scalar,ConstComplexP num)
     ComplexP complexp = (ComplexP) malloc(sizeof(Complex));
     complexp->re = num->re * scalar;
     complexp->im = num->im * scalar;
-    free(num);
     return complexp;
 }
 
@@ -169,8 +162,6 @@ ComplexP mult(ConstComplexP num1,ConstComplexP num2)
     ComplexP complexp = (ComplexP) malloc(sizeof(Complex));
     complexp->re = (num1->re * num2->re) - (num2->im * num1->im);
     complexp->im = (num1->re * num2->im) + (num2->re * num1->im);
-    free(num1);
-    free(num2);
     return complexp;
 }
 

@@ -42,6 +42,7 @@ GroupMemberP composeFunctions(GroupMemberP (*f)(GroupMemberP), GroupMemberP (*g)
 	return result;
 }
 
+//returns 1 iff e*id=id=id*e
 static int identityCheck(ConstGroupMemberP IdentityElement, GroupMemberP e, GroupMemberP (*oper)(GroupMemberP, GroupMemberP),
 							void (*freeMember)(GroupMemberP), int (*compare)(GroupMemberP, GroupMemberP))
 {	
@@ -58,36 +59,80 @@ static int identityCheck(ConstGroupMemberP IdentityElement, GroupMemberP e, Grou
 	}
 	(*freeMember)(result1);
 	(*freeMember)(result2);
-	(*freeMember)(e);
 	return retValue
 }
 
-static int commutativeCheck(GroupMemberP e1, GroupMemberP e2, GroupMemberP (*oper)(GroupMemberP, GroupMemberP),
-								void (*freeMember)(GroupMemberP), int (*compare)(GroupMemberP, GroupMemberP))
-{
-	int retValue = 0;
-	if ((*compare)((*oper)(e1, e2), (*oper)(e2, e1)))
-	{
-		retValue = 1;
-	}
-	(*freeMember)(e1);
-	(*freeMember)(e2);
-	return retValue;
-}
-
-//returns 1 if e1, e2 are inverses
-static int inverseCheck(ConstGroupMemberP e, GroupMemberP e1, GroupMemberP e2, GroupMemberP (*oper)(GroupMemberP, GroupMemberP),
+static int associativeCheck(GroupMemberP e1, GroupMemberP e2, GroupMemberP e3, GroupMemberP (*oper)(GroupMemberP, GroupMemberP),
 								void (*freeMember)(GroupMemberP), int (*compare)(GroupMemberP, GroupMemberP))
 {
 	int retValue = 1;
-	if ((*compare)((*oper)(e1, e2), e))
+	GroupMemberP onetwo = (*oper)(e1, e2);
+	GroupMemberP twothree = (*oper)(e2, e3);
+	GroupMemberP result1 = (*oper)(onetwo, e3);
+	GroupMemberP result2 = (*oper)(e1, twothree);
+	if ((*compare)(result1, result2))
 	{
 		retValue = 0;
 	}
-	(*freeMember)(e1);
-	(*freeMember)(e2);
+	(*freeMember)(onetwo);
+	(*freeMember)(twothree);
+	(*freeMember)(result1);
+	(*freeMember)(result2);
 	return retValue;
 }
+
+static int closureCheck(GroupMemberP e1, GroupMemberP e2, GroupMemberP (*oper)(GroupMemberP, GroupMemberP),
+								void (*freeMember)(GroupMemberP), int (*compare)(GroupMemberP, GroupMemberP)
+								,GroupMemberP members[], int membersLen)
+{
+	int retValue = 0;
+	GroupMemberP product = (*oper)(e1, e2);
+	for (int i = 0; i < membersLen; i++)
+	{
+		if (!(*oper)(product, members[i]))
+		{
+			retValue = 1;
+		}
+	}
+	(*freeMember)(product);
+	return retValue;
+}
+
+//returns 1 iff e1*e2=e2*e1
+static int commutativeCheck(GroupMemberP e1, GroupMemberP e2, GroupMemberP (*oper)(GroupMemberP, GroupMemberP),
+								void (*freeMember)(GroupMemberP), int (*compare)(GroupMemberP, GroupMemberP))
+{
+	int retValue = 1;
+	GroupMemberP result1 = (*oper)(e1, e2);
+	GroupMemberP result2 = (*oper)(e2, e1);
+	if ((*compare)(result1, result2)
+	{
+		retValue = 0;
+	}
+	(*freeMember)(result1);
+	(*freeMember)(result2);
+	return retValue;
+}
+
+//returns 1 iff e1 has an inverse
+static int inverseCheck(ConstGroupMemberP IdentityElement, GroupMemberP e1, GroupMemberP (*oper)(GroupMemberP, GroupMemberP),
+								void (*freeMember)(GroupMemberP), int (*compare)(GroupMemberP, GroupMemberP)
+								,GroupMemberP members[], int membersLen)
+{
+	for (int i = 0; i < membersLen; i++)
+	{
+		GroupMemberP result = (*oper)(e1, members[i]);
+		if (!(*compare)(result, IdentityElement))
+		{
+			(*freeMember)(result);
+			return 1;
+		}
+		(*freeMember)(result);
+	}
+	return 0;
+}
+
+
 
 
 /**
@@ -107,19 +152,41 @@ static int inverseCheck(ConstGroupMemberP e, GroupMemberP e1, GroupMemberP e2, G
 bool isAbelianGroup(ConstGroupMemberP IdentityElement, GroupMemberP members[], int membersLen, GroupMemberP (*oper)(GroupMemberP, GroupMemberP),
 						 void (*freeMember)(GroupMemberP), int (*compare)(GroupMemberP, GroupMemberP)
 {
-	int identityProperty, closureProperty, commutativeProperty;
 	for (int i = 0; i < membersLen; i++)
 	{
-		identityProperty = identityCheck(IdentityElement, members[i], oper, freeMember, compare);
-		closureProperty = 0;
-		commutativeProperty = 1;
-		for (int j = i; j < membersLen; j++)
+		if (!(inverseCheck(IdentityElement, members[i], oper, freeMember, compare, members, membersLen)))
 		{
-			if(!commutativeCheck(members[i], members[j], oper, freeMember, compare))
+			printf("failed inverse property check\n");
+			return false;
+		}
+		if (!(identityCheck(IdentityElement, members[i] ,oper, freeMember, compare)))
+		{
+			printf("failed identity property check\n");
+			return false;
+		}
+		
+		for (int j = 0; j < membersLen; j++)
+		{
+			if (!closureCheck(members[i], members[j], oper, freeMember, compare, members, membersLen))
 			{
-				commutativeProperty = 0;
+				printf("failed closure property check\n");
+				return false;
 			}
-			
+			if (!(commutativeCheck(members[i], members[j], oper, freeMember, compare)))
+			{
+				printf("failed commutative property check\n");
+				return false;
+			}
+
+			for (int k = 0; k < membersLen; k++)
+			{
+				if (!(associativeCheck(members[i], members[j], members[k], oper, freeMember, compare)))
+				{
+					printf("failed associativeCheck\n");
+					return false;
+				}
+			}
 		}
 	}
+	return true;
 }
